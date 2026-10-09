@@ -1476,7 +1476,13 @@
   (set! (-> v1-79 func)
         (lambda ((arg0 script-context)) (case (-> arg0 param 1)
                                           (('board)
-                                           (logtest? (-> *game-info* features) (game-feature board))
+                                           ;; JET-BOARD START: only the stadium's region script asks this, to play the
+                                           ;; "put the JET-Board back" scene after Keira's training. Jak keeps the board,
+                                           ;; so the scene plays the once the story needs (it closes stadium-board1-done)
+                                           ;; and never again on later visits.
+                                           (and (logtest? (-> *game-info* features) (game-feature board))
+                                                (not (task-node-closed? (game-task-node stadium-board1-done)))
+                                                )
                                            )
                                           (else
                                             (format 0 "ERROR: SCRIPT: unknown feature type ~A~%" (-> arg0 param 1))

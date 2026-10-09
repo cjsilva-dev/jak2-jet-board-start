@@ -1,48 +1,46 @@
-> [!NOTE]
-> You can read the original README for the OpenGOAL project [here](https://github.com/open-goal/jak-project/blob/master/README.md).
-> In particular you may want to check out the Development Environment setup [here](https://github.com/open-goal/jak-project/blob/master/README.md#setting-up-a-development-environment)
+# JET-Board Start — Jak II
 
-# OpenGoal-Mod-Base
-Serves as a base template for openGOAL mods that will be supported via [OG-ModLauncher](https://github.com/OpenGOAL-Mods/OG-ModLauncher).
+**The JET-Board from the first moment of the game.** An [OpenGOAL](https://opengoal.dev) mod for
+*Jak II* that puts Keira's JET-Board in Jak's hands from the prison onwards. Press **R2** anywhere the
+game lets you ride, from the Fortress escape through all of Haven City and beyond, instead of waiting
+for the Stadium missions.
 
-- Please ensure you are not committing copyrighted material to your repo (the `.gitignore` should help prevent this). 
-- Generally speaking you should only be updating certain directories/files:
-  - GOAL code (`/goal_src`)
-  - Assets specific to the PC Port (`/game/assets/jak1/`, `/custom_assets/`)
-  - The executable binaries (`/out/build/Release/goalc.exe`, `/out/build/Release/gk.exe`, `/out/build/Release/extractor.exe`)
-  - Decompiler config (`/decompiler/config`)
+## What changes
 
-## Custom Navmesh Implementation and Example
+- Jak always has the JET-Board. It is granted every frame, so a new game, a loaded save, or the story
+  handing it back can't take it away.
+- The story still plays out as written. Keira's training (*Win JET-Board Stadium Challenge*) works as
+  before: the board on the stand, the training, the judges. Afterwards, the one scene where Jak puts
+  the board back on its stand plays once, because the next mission waits for it, and then never again.
+  Jak keeps the board; later, Samos still hands it over for the Haven Forest scouts, which changes
+  nothing.
+- Everything else is the stock game: where the board is allowed, how it rides, the tricks, the
+  Stadium challenges and the board missions.
 
-LuminarLight made changes that allow placing custom navmesh into Jak 1 levels. This will hopefully become useless one day, if proper navmesh support is ever added to OpenGOAL.
+Nothing is required of the player. There are no settings.
 
-The navmesh system in Jak II is more advanced, I haven't managed to figure it out yet.
+## How it is done
 
-### Getting Started
+Two small changes in `goal_src/jak2/`:
 
-Please keep in mind that you are expected to be familiar with custom levels and GOAL. Still, I tried to make things as understandable as possible.
+- `engine/mods/mod-custom-code.gc` — `runs-every-frame` sets the `board` game feature.
+- `engine/util/script.gc` — the `game-feature?` script form, which the Stadium's region script uses to
+  decide whether to play the "put the JET-Board back" scene, answers *no* once that scene has run
+  (the `stadium-board1-done` task node is closed). Without this the scene would replay on every visit
+  to the Stadium until the Haven Forest mission.
 
-I would recommend copying an existing navmesh as a start. You can use the inspect method I made. The actor whose navmesh you want to copy must be loaded. Example:
-`(inspect (-> (the-as entity-actor (entity-by-name "snow-bunny-55")) nav-mesh))`
+The game's own task logic (`add-board` / `sub-board`) is untouched; the every-frame grant simply
+outlasts it.
 
-You should change the origin and bounds, depending on where you want to place your navmesh.
+## Not included
 
-I usually just remove the nodes, because I do not understand it and things seem fine without it. But keep in mind that every navmesh that is in the game has at least one node.
+This mod contains only code. Everything it shows comes from your own copy of *Jak II*. HD texture
+packs are not part of it; install your favourite pack through the OpenGOAL launcher as usual.
 
-We do not understand route, but it is needed - otherwise game will crash. If you copy an existing navmesh, the route data is copied correctly. But since we don't understand it, for fully custom navmesh we can never have proper route data. Correct route data is essential if you want to take advantage of gap triangles (where enemies jump).
+## Credits
 
-You can make multiple enemies use the same navmesh. To do this, create the navmesh through code for the first actor, like in the example. And for the other actors, add a lump that tells the game to use another actor's navmesh. Reference is by aid. Example: `"nav-mesh-actor": ["uint32", 40000]`. Tip: You can do the same thing with paths, using the `path-actor` lump.
+- Built on the [OG-Mod-Base](https://github.com/OpenGOAL-Mods/OG-Mod-Base) template and the
+  [OpenGOAL](https://github.com/open-goal/jak-project) project.
+- *Jak II* © Naughty Dog / Sony Interactive Entertainment. This is a fan project.
 
-If the game crashes when you approach a custom navmesh, make sure you added `:custom-hacky? #t` to your custom navmesh definition. If that is there, then check if the actor has a path. It needs a path.
-
-If something is still unclear, please look at the code. I added a lot of comments.
-
-### Final Words
-
-I am not an expert at decompiling, so my methods were not the most efficient. But with a lot of time, I managed to figure things out. There are probably people who could do this a lot better than me. Hopefully it will happen.
-
-Also, I know my inspect method is not perfect. But it is very tedious to write such a thing, so I just included what we really need. And I think the nodes part could use a cleanup.
-
-I am happy if anyone finds this useful. But I have a request: If you learn more about navmeshes, especially things that would benefit other modders as well, please let me know. And maybe we will add it to this branch.
-
-*~~Luminar Light*
+The mod base's own readme (with OpenGOAL setup links) is kept in [README.opengoal.md](README.opengoal.md).
