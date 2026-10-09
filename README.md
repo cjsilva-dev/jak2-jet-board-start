@@ -7,8 +7,8 @@ for the Stadium missions.
 
 ## What changes
 
-- Jak always has the JET-Board. It is granted every frame, so a new game, a loaded save, or the story
-  handing it back can't take it away.
+- Jak has the JET-Board from the prison onwards, in a new game and in any save you load, and the
+  game never takes it away.
 - The story still plays out as written. Keira's training (*Win JET-Board Stadium Challenge*) works as
   before: the board on the stand, the training, the judges. Afterwards, the one scene where Jak puts
   the board back on its stand plays once, because the next mission waits for it, and then never again.
@@ -21,16 +21,19 @@ Nothing is required of the player. There are no settings.
 
 ## How it is done
 
-Two small changes in `goal_src/jak2/`:
+Three small changes in `goal_src/jak2/`:
 
-- `engine/mods/mod-custom-code.gc` — `runs-every-frame` sets the `board` game feature.
-- `engine/util/script.gc` — the `game-feature?` script form, which the Stadium's region script uses to
-  decide whether to play the "put the JET-Board back" scene, answers *no* once that scene has run
-  (the `stadium-board1-done` task node is closed). Without this the scene would replay on every visit
-  to the Stadium until the Haven Forest mission.
+- `engine/game/task/task-control.gc` — the game rebuilds its feature flags from the task graph on
+  every new game, loaded save and death (`update-task-masks`); the `board` feature is now part of the
+  base set it starts from. The `sub-board` task command (the `stadium-board1-done` node, where Keira
+  takes the board back until the Haven Forest mission) no longer removes it.
+- `engine/util/script.gc` — the `game-feature!` script command can give the board but no longer take
+  it (the Stadium's "put the JET-Board back" scene used it), and the `game-feature?` test, which the
+  Stadium's region script uses to decide whether to play that scene, answers *no* once the scene has
+  run (the `stadium-board1-done` task node is closed). Without this the scene would replay on every
+  visit to the Stadium until the Haven Forest mission.
 
-The game's own task logic (`add-board` / `sub-board`) is untouched; the every-frame grant simply
-outlasts it.
+Nothing runs per frame; the board is simply part of the base game state and is never taken away.
 
 ## Not included
 

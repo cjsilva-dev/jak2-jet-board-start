@@ -1454,9 +1454,10 @@
                           (lambda ((arg0 script-context))
                             (case (-> arg0 param 1)
                               (('board)
+                               ;; JET-BOARD START: a script can give the board but no longer take it
+                               ;; (the Stadium's "put the JET-Board back" scene does that after Keira's training).
                                (if (-> arg0 param 2)
                                    (logior! (-> *game-info* features) (game-feature board))
-                                   (logclear! (-> *game-info* features) (game-feature board))
                                    )
                                )
                               (else
@@ -1476,10 +1477,10 @@
   (set! (-> v1-79 func)
         (lambda ((arg0 script-context)) (case (-> arg0 param 1)
                                           (('board)
-                                           ;; JET-BOARD START: only the stadium's region script asks this, to play the
-                                           ;; "put the JET-Board back" scene after Keira's training. Jak keeps the board,
-                                           ;; so the scene plays the once the story needs (it closes stadium-board1-done)
-                                           ;; and never again on later visits.
+                                           ;; JET-BOARD START: only the Stadium's region script asks this, to play the
+                                           ;; "put the JET-Board back" scene after Keira's training. Since Jak keeps the
+                                           ;; board, the scene plays the once the story needs (it closes
+                                           ;; stadium-board1-done) and never again on later visits.
                                            (and (logtest? (-> *game-info* features) (game-feature board))
                                                 (not (task-node-closed? (game-task-node stadium-board1-done)))
                                                 )

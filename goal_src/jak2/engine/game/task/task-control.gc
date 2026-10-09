@@ -70,11 +70,15 @@
   (cond
     ((or (= arg0 'debug) (= arg0 'level))
      )
+    ;; JET-BOARD START: the game rebuilds its feature flags from here (new game, loaded save, death)
+    ;; and then re-applies what the closed task nodes grant. The JET-Board is a base feature now, so
+    ;; Jak has it from the prison onwards in any save, and the story's two ways of taking it back are
+    ;; switched off (sub-board below, and the game-feature! script command in script.gc).
     ((logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-     (set! (-> *game-info* features) (game-feature gun gun-yellow gun-red gun-blue gun-dark))
+     (set! (-> *game-info* features) (game-feature gun gun-yellow gun-red gun-blue gun-dark board))
      )
     (else
-      (set! (-> *game-info* features) (game-feature))
+      (set! (-> *game-info* features) (game-feature board))
       0
       )
     )
@@ -990,7 +994,8 @@
      (logior! (-> *game-info* features) (game-feature board-training))
      )
     (((game-task-node-command sub-board))
-     (logclear! (-> *game-info* features) (game-feature board))
+     ;; JET-BOARD START: stadium-board1-done would hand the board back to Keira until the Haven
+     ;; Forest scouts mission. Jak keeps it (see update-task-masks above).
      )
     (((game-task-node-command add-gun-red))
      (logior! (-> *game-info* features) (game-feature gun gun-red))
